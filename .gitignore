@@ -1,0 +1,8 @@
+# bysrkh, 2018
+# bysrkh.com
+
+# Jetbrains
+.idea
+
+# npm local packages
+node_modules
