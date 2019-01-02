@@ -1,9 +1,10 @@
 const router = require('express').Router()
-const todo = require('./model/todo')
 const bodyParser = require('body-parser')
-const globalTimeLog = require('./middleware/global-time-log')
 const uuid = require('uuid/v1')
 
+const globalTimeLog = require('../middleware/global-time-log')
+const todo = require('../model/todo')
+const ModelNotFoundException = require('../util/error/ModelNotFoundException')
 /*
     apply third party middleware
  */
@@ -29,10 +30,16 @@ router.put('/', (req, res) => (
         .then(({id}) => res.json({message: `todo with id ${id} has been updated`}))
 ))
 
-router.delete('/:id', (req, res) => (
+router.delete('/:id', (req, res, next) => (
     todo
         .destroy({where: {id: req.params.id}})
-        .then(({status}) => res.json({message: `todo with id ${req.params.id} has been deleted`}))
+        .then(({status}) => {
+            if(!status)
+                throw new ModelNotFoundException(`Todo : ${req.params.id} is not found`)
+
+            res.json({message: `todo with id ${req.params.id} has been deleted`})
+        })
+        .catch(next)
 ))
 
 router.get('/', (req, res) => (
@@ -41,10 +48,15 @@ router.get('/', (req, res) => (
         .then((todos = []) => res.json(todos))
 ))
 
-router.get('/:id', (req, res) => (
+router.get('/:id', (req, res, next) => (
     todo
         .findOne({where: {id: req.params.id}})
-        .then(todo => res.json(todo))
+        .then(todo => {
+            if(!todo)
+                throw new ModelNotFoundException(`Todo : ${req.params.id} is not found`)
+
+            res.json(todo)
+        }).catch(next)
 ))
 
 module.exports = router
