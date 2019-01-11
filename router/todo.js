@@ -1,19 +1,19 @@
 const router = require('express').Router()
-const bodyParser = require('body-parser')
 const uuid = require('uuid/v1')
 
 const globalTimeLog = require('../middleware/global-time-log')
-const todo = require('../model/todo')
-const ModelNotFoundException = require('../util/error/ModelNotFoundException')
+const globalAuth = require('../middleware/global-auth')
+const {user, role} = require('../util/db/database')
+const {ModelNotFoundException} = require('../util/error/Error')
 /*
     apply third party middleware
  */
-router.use(bodyParser.json())
 
 /*
     apply custom global middleware
  */
 router.use(globalTimeLog)
+router.use(globalAuth)
 
 /*
     define routing for todo operation
