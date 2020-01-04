@@ -25,8 +25,8 @@ router.post('/', (req, res) => (
 
 router.put('/', (req, res) => (
     todo
-        .update({...req.body}, {where: {id: req.body.id}})
-        .then(({id}) => res.json({message: `todo with id ${id} has been updated`}))
+        .update({...req.body}, {where: {id: req.body.id}, returning: true})
+        .then(result => res.json({message: `todo with id ${result[1][0].id} has been updated`}))
 ))
 
 router.delete('/:id', (req, res) => (

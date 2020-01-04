@@ -1,4 +1,4 @@
-const {STRING} = require('sequelize')
+const {STRING, DATE, NOW} = require('sequelize')
 const conn = require('../util/db')
 
 /*
@@ -11,11 +11,19 @@ module.exports = conn.define(
             type: STRING,
             primaryKey: true
         },
+        title: {
+            type: STRING
+        },
         description: {
             type: STRING
+        },
+        createdDate: {
+            field: 'created_date',
+            type: DATE,
+            defaultValue: NOW
         }
     }, {
         tableName: 'todo',
         timestamps: false
     }
-    )
+)

@@ -1,11 +1,15 @@
 const moment = require('moment')
+const LogMessageBuilder = require('../util/log-message-builder')
 /*
     define middleware for logging
  */
 module.exports = (req, res, next) => {
-    currentTime = moment()
+    const currentTime = moment()
 
-    console.info(`{'method': '${req.method}', 'uri': '${req.originalUrl}', 'payload': '${JSON.stringify(req.body)}', 'startTimeExecution': '${currentTime.format('DD-MM-YYYY hh:mm:ss')}', 'startTimeInUTCExecution': '${currentTime.format('YYYY-MM-DD HH:mm:ssZZ')}'} `)
+    console.log(
+        new LogMessageBuilder(req.method, req.originalUrl, req.headers['accept-language'], req.headers['accept'], req.body, currentTime)
+            .toString()
+    )
 
     next()
 }

@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize')
 
 module.exports = new Sequelize(
-    'postgres://postgres:P@ssw0rd@localhost:5432/todolist'
+    'postgres://postgres:postgres@localhost:5432/todo'
 )
 
