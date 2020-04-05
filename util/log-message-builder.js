@@ -4,6 +4,7 @@
  *
  * bysrkh@gmail.com
  */
+
 /* define format */
 const utcFormat = 'YYYY-MM-DD HH:mm:ss.SSZ zz'
 const localeFormat = 'LLLL'

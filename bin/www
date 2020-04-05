@@ -1,0 +1,13 @@
+/**
+ * bysrkh
+ * @2020 GNU GPL v2, Yogyakarta
+ *
+ * bysrkh@gmail.com
+ */
+
+var app = require('../app');
+var http = require('http');
+
+var server = http.createServer(app)
+
+server.listen(8080)

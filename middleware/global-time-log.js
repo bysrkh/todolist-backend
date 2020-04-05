@@ -1,3 +1,10 @@
+/**
+ * bysrkh
+ * @2020 GNU GPL v2, Yogyakarta
+ *
+ * bysrkh@gmail.com
+ */
+
 const moment = require('moment')
 const LogMessageBuilder = require('../util/log-message-builder')
 /*
