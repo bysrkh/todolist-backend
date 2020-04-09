@@ -6,6 +6,7 @@
  */
 
 const todoRouter = require('./router/todoRouter')
+const userRouter = require('./router/userRouter')
 const error = require('./controller/errorController')
 const app = require('express')()
 const cors = require('cors')
@@ -15,6 +16,7 @@ const globalTimeLog = require('./middleware/global-time-log')
 app.use(bodyParser.json())
 app.use(globalTimeLog)
 app.use('/todo', todoRouter)
+app.use('/user', userRouter)
 app.all('*', error.apiNotFoundController)
 app.use(cors())
 app.use(error.globalErrorController)

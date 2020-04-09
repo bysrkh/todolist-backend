@@ -11,7 +11,7 @@ const router = express.Router()
 router
     .route('/')
     .post(todoController.create)
-    .put(todoController.put)
+    .put(todoController.update)
     .get(todoController.findAll)
 
 router.route('/:id')

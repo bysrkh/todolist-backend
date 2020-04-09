@@ -4,31 +4,31 @@
  *
  * bysrkh@gmail.com
  */
-const todo = require('../model/todo')
+const todoModel = require('../model/todoModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
 
 const create = catchAsync(async (req, res, next) => {
-    const todoCreate = await todo.create({...req.body})
+    const todo = await todoModel.create({...req.body})
     res.json({message: `todo with id : ${req.body.id} has been created`})
 })
 
-const put = catchAsync(async (req, res, next) => {
-    const [updateSuccess] = await todo.update(
+const update = catchAsync(async (req, res, next) => {
+    const [success] = await todoModel.update(
         {...req.body},
-        {where: {id: req.body.id}}
+        {where: {id: req.body.id}, individualHooks: true}
     )
-    updateSuccess ?
+    success ?
         res.json({message: `todo with id : ${req.body.id} has been updated`}) :
         next(new AppError({
             status: 404,
-            message: `Todo ID : ${req.body.id} is not found`
+            message: `Todo ID : ${req.body.id} can not be updated`
         }))
 })
 
 const remove = catchAsync(async (req, res, next) => {
-        const removeSuccess = await todo.destroy({where: {id: req.params.id}})
-        removeSuccess ?
+        const success = await todoModel.destroy({where: {id: req.params.id}})
+        success ?
             res.json({message: `todo with id ${req.params.id} has been deleted`}) :
             next(new AppError({
                 status: 404,
@@ -38,30 +38,32 @@ const remove = catchAsync(async (req, res, next) => {
 )
 
 const findAll = catchAsync(async (req, res, next) => {
-    const todoList = await todo.findAll({
+    const todos = await todoModel.findAll({
         offset: req.query.pageNumber * req.query.pageSize,
         limit: req.query.pageSize,
         order: [['createdDate', 'DESC']]
     })
-    const totalTodoList = await todo.count()
+
+    console.log([...todos])
+    const todoTotal = await todoModel.count()
 
     res.json({
-        data: [...todoList],
+        data: [...todos],
         pageSize: parseInt(req.query.pageSize),
         pageNumber: parseInt(req.query.pageNumber),
-        total: totalTodoList
+        total: todoTotal
     })
 })
 
 const find = catchAsync(async (req, res, next) => {
-    const todoDetail = await todo.findOne({where: {id: req.params.id}})
-    todoDetail ?
-        res.json({...todo}) :
+    const todo = await todoModel.findOne({where: {id: req.params.id}})
+    todo ?
+        res.json({...todo.toJSON()}) :
         next(new AppError({
             status: 404,
-            message: `Todo ID : ${req.path.params} is not found`
+            message: `Todo ID : ${req.params.id} is not found`
         }))
 })
 
-module.exports = {create, put, remove, findAll, find}
+module.exports = {create, update, remove, findAll, find}
 

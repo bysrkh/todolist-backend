@@ -10,9 +10,9 @@ const conn = require('../util/db')
 uuid = require('uuid/v1')
 
 /*
-    define model for table : todo table
+    define model for table : todoModel table
  */
-const todo = conn.define(
+const todoModel = conn.define(
     'todo',
     {
         id: {
@@ -42,8 +42,8 @@ const todo = conn.define(
     }
 )
 
-todo.prototype.completeMustNotBeUpdatedToFalse = function (candidateComplete) {
+todoModel.prototype.completeMustNotBeUpdatedToFalse = function (candidateComplete) {
     return !this.complete || candidateComplete
 }
 
-module.exports = todo;
+module.exports = todoModel
