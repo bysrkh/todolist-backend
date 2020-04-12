@@ -4,19 +4,21 @@
  *
  * bysrkh@gmail.com
  */
-const todoController = require('../controller/todoController')
 const express = require('express')
 const router = express.Router()
 
+const todoController = require('../controller/todoController')
+const authController = require('../controller/authController')
+
 router
     .route('/')
-    .post(todoController.create)
-    .put(todoController.update)
-    .get(todoController.findAll)
+    .post(authController.protect, authController.restrictTo('user'), todoController.create)
+    .put(authController.protect, authController.restrictTo('user'), todoController.update)
+    .get(authController.protect, authController.restrictTo('user'), todoController.findAll)
 
 router.route('/:id')
-    .get(todoController.find)
-    .delete(todoController.remove)
+    .get(authController.protect, authController.restrictTo('user'), todoController.find)
+    .delete(authController.protect, authController.restrictTo('user'), todoController.remove)
 
 module.exports = router
 

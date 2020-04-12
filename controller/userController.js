@@ -7,26 +7,13 @@
 const userModel = require('../model/userModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
+const jwt = require('jsonwebtoken')
+const {promisify} = require('util')
 
 const create = catchAsync(async (req, res, next) => {
     const user = await userModel.create({...req.body})
     res.json({message: `User with id : ${user.id} has been created`})
 })
-
-// TODO: Available soon
-// const login = catchAsync(async (req, res, next) => {
-//     const user = await userModel.findOne({where: {username: req.body.username}})
-//     user || next(new AppError({
-//         status: 404,
-//         message: `User with username ${req.body.username} is not found`
-//     }))
-//     user.isPasswordCorrect(req.body.password) && next(new AppError({
-//         status: 402,
-//         message: `Incorrect password`
-//     }))
-//
-//     //bikin jwt
-// })
 
 const find = catchAsync(async (req, res, next) => {
     const user = await userModel.findByPk(req.params.id, {attributes: {exclude: ['password']}})

@@ -6,14 +6,18 @@
  */
 
 const {STRING, DATE, NOW, VIRTUAL} = require('sequelize')
-const conn = require('../util/db')
 uuid = require('uuid/v1')
 bcrypt = require('bcrypt')
+const moment = require('moment')
+const crypto = require('crypto')
+const conn = require('../util/db')
+
+const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
 
 /*
     define model for table : user table
  */
-const user = conn.define(
+const userModel = conn.define(
     'user',
     {
         id: {
@@ -24,7 +28,16 @@ const user = conn.define(
         username: {
             type: STRING,
             allowNull: false,
+            unique: true,
             validate: {notEmpty: {msg: 'Username can not be empty'}}
+        },
+        email: {
+            type: STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: {msg: 'Email can not be empty'},
+                isEmail: {msg: 'Email is not proper format'}
+            }
         },
         password: {
             type: STRING,
@@ -42,7 +55,31 @@ const user = conn.define(
                 }
             }
         },
+        role: {
+            type: STRING,
+            allowNull: false,
+            defaultValue: 'user',
+            validate: {
+                notEmpty: {msg: 'Role can not be empty'},
+                isIn: {
+                    args: ['user', 'admin', 'public'],
+                    msg: 'Role must be filled by user or admin or public as an input value'
+                }
+            }
+        },
         isModified: VIRTUAL,
+        passwordResetToken: {
+            field: 'password_reset_token',
+            type: STRING,
+        },
+        passwordResetExpires: {
+            field: 'password_reset_expires',
+            type: Date,
+        },
+        modifiedPasswordDate: {
+            field: 'modified_password_date',
+            type: DATE,
+        },
         createdDate: {
             field: 'created_date',
             type: DATE,
@@ -61,5 +98,27 @@ const user = conn.define(
     }
 )
 
+userModel.prototype.isPasswordCorrect = async function (candidatePassword) {
+    return await bcrypt.compare(candidatePassword, this.password);
+}
+userModel.prototype.isPasswordModified = function (candidateTime) {
+    return candidateTime < this.modifiedPasswordDate
+}
 
-module.exports = user;
+userModel.prototype.resetPassword = async function () {
+    const resetToken = await crypto
+        .randomBytes(32)
+        .toString('hex')
+    this.passwordResetToken = await crypto
+        .createHash('sha256')
+        .update(resetToken)
+        .digest()
+
+    console.log('here the log')
+    console.log(this.passwordResetToken)
+    console.log(resetToken)
+    this.passwordResetExpires = moment().valueOf() * THIRTEEN_MINUTES_CONSTANT;
+    console.log(this.passwordResetExpires)
+}
+
+module.exports = userModel;

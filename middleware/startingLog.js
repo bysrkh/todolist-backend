@@ -6,7 +6,7 @@
  */
 
 const moment = require('moment')
-const LogMessageBuilder = require('../util/log-message-builder')
+const LogMessageBuilder = require('../util/logMessageBuilder')
 /*
     define middleware for logging
  */

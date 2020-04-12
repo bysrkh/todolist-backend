@@ -4,20 +4,26 @@
  *
  * bysrkh@gmail.com
  */
-const userController = require('../controller/userController')
 const express = require('express')
 const router = express.Router()
 
+const userController = require('../controller/userController')
+const authController = require('../controller/authController')
+
 router
     .route('/')
-    .get(userController.findAll)
-    .post(userController.create)
-    .put(userController.update)
+    .get(authController.protect, authController.restrictTo('admin'), userController.findAll)
+    .post(authController.protect, authController.restrictTo('admin'), userController.create)
+    .put(authController.protect, authController.restrictTo('admin'), userController.update)
+
+router
+    .route('/changePassword')
+    .post(authController.protect, authController.restrictTo('user'), userController.update)
 
 router
     .route('/:id')
-    .get(userController.find)
-    .delete(userController.remove)
+    .get(authController.protect, authController.restrictTo('admin'), userController.find)
+    .delete(authController.protect, authController.restrictTo('admin'), userController.remove)
 
 module.exports = router
 
