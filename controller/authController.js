@@ -11,6 +11,7 @@ const moment = require('moment')
 const userModel = require('../model/userModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
+const sendEmail = require('../util/sendEmail')
 
 const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
 
@@ -50,12 +51,31 @@ const forgotPassword = catchAsync(async (req, res, next) => {
     const resetToken = await user.resetPassword()
     await user.save();
 
-    res.json({id: user.id, resetToken: resetToken})
+
+    const resetUrl = `${req.protocol}://${req.hostname}/resetPassword/${resetToken}`
+
+    try {
+        await sendEmail({
+            email: user.email,
+            subject: 'Resetting Password Password Request',
+            content: `Please click the link below to confirm reseting password ${resetUrl}`
+        })
+
+        res.json({id: user.id, resetToken: resetToken})
+    } catch (err) {
+        user.passwordResetToken
+        user.passwordResetExpires
+        user.save()
+
+        next(new AppError({
+            status: 500, message: 'Error when sending e-mail'
+        }))
+
+    }
 })
 
 const register = catchAsync(async (req, res, next) => {
 
-    console.log(`perhatikan ini di ${moment()}`)
     const user = await userModel.create({...req.body, role: 'user'})
 
     const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: 30000})

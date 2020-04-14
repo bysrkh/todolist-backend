@@ -8,11 +8,11 @@
 const {STRING, DATE, NOW, VIRTUAL} = require('sequelize')
 uuid = require('uuid/v1')
 bcrypt = require('bcrypt')
-const moment = require('moment')
 const crypto = require('crypto')
 const conn = require('../util/db')
+const {buildCurrentDateInUtc} = require('../util/DateUtil')
 
-const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
+const THIRTEEN_MINUTES_CONSTANT = 60 * 60
 
 /*
     define model for table : user table
@@ -108,17 +108,12 @@ userModel.prototype.isPasswordModified = function (candidateTime) {
 userModel.prototype.resetPassword = async function () {
     const resetToken = await crypto
         .randomBytes(32)
-        .toString('hex')
+        .toString('utf8')
     this.passwordResetToken = await crypto
         .createHash('sha256')
         .update(resetToken)
-        .digest()
-
-    console.log('here the log')
-    console.log(this.passwordResetToken)
-    console.log(resetToken)
-    this.passwordResetExpires = moment().valueOf() * THIRTEEN_MINUTES_CONSTANT;
-    console.log(this.passwordResetExpires)
+        .digest('hex')
+    this.passwordResetExpires = buildCurrentDateInUtc()
 }
 
 module.exports = userModel;
