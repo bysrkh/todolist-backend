@@ -17,10 +17,6 @@ router
     .put(authController.protect, authController.restrictTo('admin'), userController.update)
 
 router
-    .route('/changePassword')
-    .post(authController.protect, authController.restrictTo('user'), userController.update)
-
-router
     .route('/:id')
     .get(authController.protect, authController.restrictTo('admin'), userController.find)
     .delete(authController.protect, authController.restrictTo('admin'), userController.remove)

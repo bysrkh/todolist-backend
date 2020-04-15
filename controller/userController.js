@@ -4,29 +4,32 @@
  *
  * bysrkh@gmail.com
  */
-const userModel = require('../model/userModel')
-const AppError = require('../util/AppError')
-const catchAsync = require('../util/catchAsync')
 const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
 
+const userModel = require('../model/userModel')
+const AppError = require('../util/AppError')
+const catchAsync = require('../util/catchAsync')
+const {userProperties} = require('../util/ObjectUtil')
+
 const create = catchAsync(async (req, res, next) => {
     const user = await userModel.create({...req.body})
-    res.json({message: `User with id : ${user.id} has been created`})
+
+    res
+        .status(201)
+        .json({message: `User with id : ${user.id} has been created`})
 })
 
 const find = catchAsync(async (req, res, next) => {
-    const user = await userModel.findByPk(req.params.id, {attributes: {exclude: ['password']}})
+    const user = await userModel.findByPk(req.params.id, {attributes: {include: userProperties.showUser}})
     user ?
-        res.json({...user.toJSON()}) :
-        next(new AppError({
-            status: 404,
-            message: `User with id : ${req.params.id} is not found`
-        }))
+        res.json(user.toJSON()) :
+        next(new AppError({status: 404, message: `User with id : ${req.params.id} is not found`}))
 })
 
 const findAll = catchAsync(async (req, res, next) => {
-    const users = await userModel.findAll({attributes: {exclude: ['password']}})
+    const users = await userModel.findAll({attributes: {include: userProperties.showUser}})
+
     res.json([...users])
 })
 
@@ -37,7 +40,9 @@ const update = catchAsync(async (req, res, next) => {
         {where: {id: req.body.id}, individualHooks: true}
     )
     success ?
-        res.json({message: `User ID : ${req.body.id} has been updated`}) :
+        res
+            .status(202)
+            .json({message: `User ID : ${req.body.id} has been updated`}) :
         next(new AppError({
             status: 404,
             message: `User ID : ${req.body.id} is not found`
@@ -47,7 +52,9 @@ const update = catchAsync(async (req, res, next) => {
 const remove = catchAsync(async (req, res, next) => {
         const success = await userModel.destroy({where: {id: req.params.id}})
         success ?
-            res.json({message: `User ID : ${req.params.id} has been deleted`}) :
+            res
+                .status(204)
+                .json({message: `User ID : ${req.params.id} has been deleted`}) :
             next(new AppError({
                 status: 404,
                 message: `User ID : ${req.params.id} is not found`

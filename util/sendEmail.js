@@ -6,13 +6,13 @@
  */
 const nodemailer = require('nodemailer')
 
-module.exports = target => {
-    const transporter = nodemailer.createTransport({
+module.exports = async target => {
+    var transporter = nodemailer.createTransport({
         host: 'smtp.mailtrap.io',
-        port: 25,
+        port: 2525,
         auth: {
-            username: 'ebacd60bcc9329',
-            password: '067d60facc11b6'
+            user: 'ebacd60bcc9329',
+            pass: '067d60facc11b6'
         }
     })
 
@@ -22,4 +22,6 @@ module.exports = target => {
         subject: target.subject,
         text: target.content
     }
+
+    await transporter.sendMail(mailOptions)
 }

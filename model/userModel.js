@@ -10,9 +10,9 @@ uuid = require('uuid/v1')
 bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const conn = require('../util/db')
-const {buildCurrentDateInUtc} = require('../util/DateUtil')
+const DateUtil = require('../util/DateUtil')
 
-const THIRTEEN_MINUTES_CONSTANT = 60 * 60
+const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
 
 /*
     define model for table : user table
@@ -90,6 +90,7 @@ const userModel = conn.define(
         timestamps: false,
         hooks: {
             beforeCreate: async (user) => {
+                console.log('got here')
                 user.password = await bcrypt.hash(user.password, 12)
             }, beforeUpdate: async (user) => {
                 user.isModified && (user.password = await bcrypt.hash(user.password, 12))
@@ -108,12 +109,16 @@ userModel.prototype.isPasswordModified = function (candidateTime) {
 userModel.prototype.resetPassword = async function () {
     const resetToken = await crypto
         .randomBytes(32)
-        .toString('utf8')
+        .toString('hex')
     this.passwordResetToken = await crypto
         .createHash('sha256')
         .update(resetToken)
         .digest('hex')
-    this.passwordResetExpires = buildCurrentDateInUtc()
+    this.passwordResetExpires = new DateUtil()
+        .addDate(THIRTEEN_MINUTES_CONSTANT)
+        .toDate()
+
+    return resetToken
 }
 
 module.exports = userModel;

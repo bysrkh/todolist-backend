@@ -4,21 +4,24 @@
  *
  * bysrkh@gmail.com
  */
+const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
 const moment = require('moment')
+const {Op} = require('sequelize')
 
 const userModel = require('../model/userModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
 const sendEmail = require('../util/sendEmail')
+const {userProperties} = require('../util/ObjectUtil')
 
 const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
 
 const login = catchAsync(async (req, res, next) => {
     if (!req.body.username || !req.body.password)
         return next(new AppError({
-            status: 402,
+            status: 400,
             message: 'Password and Username can not be null'
         }))
     const user = await userModel.findOne({where: {username: req.body.username}})
@@ -29,7 +32,7 @@ const login = catchAsync(async (req, res, next) => {
         }))
     if (!await user.isPasswordCorrect(req.body.password))
         return next(new AppError({
-            status: 402,
+            status: 400,
             message: `Incorrect password`
         }))
 
@@ -40,48 +43,79 @@ const login = catchAsync(async (req, res, next) => {
 })
 
 const forgotPassword = catchAsync(async (req, res, next) => {
-    const user = await userModel.findOne({
-        where: {email: req.body.email}
-    })
+    const user = await userModel.findOne({where: {email: req.body.email}})
     if (!user)
         return next(new AppError({
-            status: 402,
-            message: `User with e-mail ${req.body.username} is not found`
+            status: 404, message: `User with e-mail ${req.body.username} is not found`
         }))
+
     const resetToken = await user.resetPassword()
     await user.save();
 
-
-    const resetUrl = `${req.protocol}://${req.hostname}/resetPassword/${resetToken}`
-
     try {
+        const resetUrl = `${req.protocol}://${req.hostname}/resetPassword/${resetToken}`
         await sendEmail({
             email: user.email,
             subject: 'Resetting Password Password Request',
-            content: `Please click the link below to confirm reseting password ${resetUrl}`
+            content: `Please click the link to confirm reseting password ${resetUrl}`
         })
 
-        res.json({id: user.id, resetToken: resetToken})
+        res.json({
+            id: user.id,
+            resetToken,
+            message: `User with username: ${user.username} is sent email instruction to reset password`
+        })
     } catch (err) {
-        user.passwordResetToken
-        user.passwordResetExpires
-        user.save()
+        user.passwordResetExpires = null
+        user.passwordResetToken = null
+        await user.save()
 
-        next(new AppError({
-            status: 500, message: 'Error when sending e-mail'
+        return next(new AppError({
+            status: 501, message: 'Error when sending e-mail'
         }))
-
     }
 })
 
+const resetPassword = catchAsync(async (req, res, next) => {
+    const passwordResetToken = await crypto
+        .createHash('sha256')
+        .update(req.params.resetToken)
+        .digest('hex')
+    const user = await userModel.findOne({
+        where: {passwordResetToken, passwordResetExpires: {[Op.gt]: new Date()}},
+    })
+
+    if (!user)
+        return next(new AppError({
+            status: 400, message: 'Token is invalid or expired'
+        }))
+
+    user.password = req.body.password
+    user.confirmPassword = req.body.confirmPassword
+    user.passwordResetExpires = null
+    user.passwordResetToken = null
+    user.isModified = true
+    user.save()
+
+    res
+        .status(202)
+        .json({
+            id: user.id,
+            message: `User with username : ${user.username} has been reset`
+        })
+})
+
 const register = catchAsync(async (req, res, next) => {
+    const user = await userModel.create({...req.body})
 
-    const user = await userModel.create({...req.body, role: 'user'})
+    const token = await promisify(jwt.sign)({id: req.body.id}, "secret", {expiresIn: 30000})
 
-    const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: 30000})
-
-    res.json({...user.toJSON(), password: undefined, confirmPassword: undefined, token})
-
+    res
+        .status(201)
+        .json({
+            message: `User with username: ${req.body.username} has been created`,
+            token: token
+        })
 })
 
 const protect = catchAsync(async (req, res, next) => {
@@ -92,18 +126,16 @@ const protect = catchAsync(async (req, res, next) => {
     if (!token)
         return next(new AppError({
             status: 401,
-            message: `User ID ${decoded.id} has invalid token`
+            message: `User has invalid token`
         }))
     console.log('the token' + token)
     const decoded = await promisify(jwt.verify)(token, 'secret')
     const user = await userModel.findByPk(decoded.id)
-    console.log(decoded)
     if (!user)
         return next(new AppError({
             status: 401,
             message: `User ID ${decoded.id} doesn't exist`
         }))
-    console.log('aku disini engkau disana')
     if (user.isPasswordModified(decoded.iat)) {
         return next(new AppError({
             status: 401,
@@ -126,5 +158,5 @@ const restrictTo = (...roles) => catchAsync(async (req, res, next) => {
 })
 
 
-module.exports = {protect, restrictTo, login, register, forgotPassword}
+module.exports = {protect, restrictTo, login, register, forgotPassword, resetPassword}
 

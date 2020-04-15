@@ -12,9 +12,17 @@ router
     .route('/login')
     .post(authController.login)
 
-router.route('/register').post(authController.register)
+router
+    .route('/register')
+    .post(authController.register)
 
-router.route('/forgotPassword').post(authController.forgotPassword)
+router
+    .route('/resetPassword/:resetToken')
+    .patch(authController.resetPassword)
+
+router
+    .route('/forgotPassword')
+    .post(authController.forgotPassword)
 
 module.exports = router
 
