@@ -5,8 +5,8 @@
  * bysrkh@gmail.com
  */
 
-const {STRING, DATE, NOW, VIRTUAL} = require('sequelize')
-uuid = require('uuid/v1')
+const {STRING, DATE, NOW, VIRTUAL, UUIDV4, UUID} = require('sequelize')
+uuid = require('uuid/v4')
 bcrypt = require('bcrypt')
 const crypto = require('crypto')
 const conn = require('../util/db')
@@ -21,9 +21,9 @@ const userModel = conn.define(
     'user',
     {
         id: {
-            type: STRING,
+            type: UUID,
             primaryKey: true,
-            defaultValue: uuid()
+            defaultValue: UUIDV4
         },
         username: {
             type: STRING,

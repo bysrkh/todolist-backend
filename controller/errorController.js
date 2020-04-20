@@ -7,7 +7,7 @@
 const AppError = require('./../util/AppError')
 
 const handleValidationErrors = error => { console.log(JSON.stringify(error)); return {
-    status: 405,
+    status: 400,
     message: 'Validation error',
     errors: Object.values(error).map(({path: field, value, message}) => ({
         field, value, message

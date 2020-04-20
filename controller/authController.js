@@ -38,7 +38,11 @@ const login = catchAsync(async (req, res, next) => {
 
     const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: THIRTEEN_MINUTES_CONSTANT})
 
-    res.json({...user.toJSON(), password: undefined, token})
+    res.cookie('jwt', token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1e3),
+        httpOnly: true
+    })
+        .json({...user.toJSON(), password: undefined})
 
 })
 
@@ -108,20 +112,22 @@ const resetPassword = catchAsync(async (req, res, next) => {
 const register = catchAsync(async (req, res, next) => {
     const user = await userModel.create({...req.body})
 
-    const token = await promisify(jwt.sign)({id: req.body.id}, "secret", {expiresIn: 30000})
+    console.log('log the request body:' + JSON.stringify(req.body))
 
-    res
+    const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: 30000})
+
+    res.cookie('jwt', token, {
+        expires: new Date(Date.now() + 24 * 60 * 60 * 1e3),
+        httpOnly: true
+    })
         .status(201)
         .json({
             message: `User with username: ${req.body.username} has been created`,
-            token: token
         })
 })
 
 const protect = catchAsync(async (req, res, next) => {
-    const token = req.headers.authorization && req.headers.authorization.startsWith('Bearer') ?
-        req.headers.authorization.split(' ')[2] :
-        undefined
+    const token = req.cookies.jwt
 
     if (!token)
         return next(new AppError({
