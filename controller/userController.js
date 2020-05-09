@@ -6,11 +6,13 @@
  */
 const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
+const multer = require('multer')
 
 const userModel = require('../model/userModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
 const {userProperties} = require('../util/ObjectUtil')
+const storageUtil = require('../util/StorageUtil')
 
 const create = catchAsync(async (req, res, next) => {
     const user = await userModel.create({...req.body})
@@ -35,6 +37,7 @@ const findAll = catchAsync(async (req, res, next) => {
 
 const update = catchAsync(async (req, res, next) => {
     (req.body.password && req.body.confirmPassword) && (req.body = {...req.body, isModified: true})
+    (req.file) && (req.body = {...req.body, photo: req.file.filename})
     const [success] = await userModel.update(
         {...req.body},
         {where: {id: req.body.id}, individualHooks: true}
@@ -49,6 +52,23 @@ const update = catchAsync(async (req, res, next) => {
         }))
 })
 
+const imageStorage = storageUtil({
+    destination: (req, file, cb) => cb(null, 'public/image/user/'),
+    filename: (req, file, cb) => cb(null, `user-image-${Date.now().valueOf()}.${file.mimetype.split('/')[1]}`)
+})
+const imageFilter = (req, file, callback) => (
+    file.mimetype.startsWith('image') ?
+        callback(null, true) :
+        callback(new AppError({status: 400, message: 'Only upload image'}), false)
+)
+
+const imageConfiguration = multer({
+    storage: imageStorage,
+    fileFilter: imageFilter
+})
+
+const uploadImage = imageConfiguration.single('photo')
+
 const remove = catchAsync(async (req, res, next) => {
         const success = await userModel.destroy({where: {id: req.params.id}})
         success ?
@@ -62,5 +82,5 @@ const remove = catchAsync(async (req, res, next) => {
     }
 )
 
-module.exports = {create, find, findAll, update, remove}
+module.exports = {create, find, findAll, update, uploadImage, remove}
 

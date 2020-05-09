@@ -13,8 +13,8 @@ const authController = require('../controller/authController')
 router
     .route('/')
     .get(authController.protect, authController.restrictTo('admin'), userController.findAll)
-    .post(authController.protect, authController.restrictTo('admin'), userController.create)
-    .put(authController.protect, authController.restrictTo('admin'), userController.update)
+    .post(userController.create)
+    .put(userController.uploadImage, userController.update)
 
 router
     .route('/:id')

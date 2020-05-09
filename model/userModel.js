@@ -55,6 +55,11 @@ const userModel = conn.define(
                 }
             }
         },
+        photo: {
+            type: STRING,
+            allowNull: false,
+            validate: {notEmpty: {msg: 'Can not be empty'}}
+        },
         role: {
             type: STRING,
             allowNull: false,
