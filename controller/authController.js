@@ -14,9 +14,10 @@ const userModel = require('../model/userModel')
 const AppError = require('../util/AppError')
 const catchAsync = require('../util/catchAsync')
 const sendEmail = require('../util/sendEmail')
-const {userProperties} = require('../util/ObjectUtil')
-
-const THIRTEEN_MINUTES_CONSTANT = 30 * 60 * 1e3
+const {
+    userProperties,
+    ONE_DAY_CONSTANT,
+} = require('../util/ObjectUtil')
 
 const login = catchAsync(async (req, res, next) => {
     if (!req.body.username || !req.body.password)
@@ -36,11 +37,12 @@ const login = catchAsync(async (req, res, next) => {
             message: `Incorrect password`
         }))
 
-    const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: THIRTEEN_MINUTES_CONSTANT})
+    const token = await promisify(jwt.sign)({id: user.id}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRATION_TIME * ONE_DAY_CONSTANT})
 
     res.cookie('jwt', token, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1e3),
-        httpOnly: true
+        expires: new Date(Date.now() + process.env.JWT_EXPIRATION_TIME * ONE_DAY_CONSTANT),
+        httpOnly: true,
+        secure: process.env.ENV_INFO !== 'dev'
     })
         .json({...user.toJSON(), password: undefined})
 
@@ -114,10 +116,10 @@ const register = catchAsync(async (req, res, next) => {
 
     console.log('log the request body:' + JSON.stringify(req.body))
 
-    const token = await promisify(jwt.sign)({id: user.id}, "secret", {expiresIn: 30000})
+    const token = await promisify(jwt.sign)({id: user.id}, process.env.JWT_SECRET, {expiresIn: process.env.JWT_EXPIRATION_TIME * ONE_DAY_CONSTANT})
 
     res.cookie('jwt', token, {
-        expires: new Date(Date.now() + 24 * 60 * 60 * 1e3),
+        expires: new Date(Date.now() + process.env.JWT_EXPIRATION_TIME * ONE_DAY_CONSTANT),
         httpOnly: true
     })
         .status(201)
@@ -135,7 +137,7 @@ const protect = catchAsync(async (req, res, next) => {
             message: `User has invalid token`
         }))
     console.log('the token' + token)
-    const decoded = await promisify(jwt.verify)(token, 'secret')
+    const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET)
     const user = await userModel.findByPk(decoded.id)
     if (!user)
         return next(new AppError({

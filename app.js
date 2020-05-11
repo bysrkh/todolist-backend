@@ -10,17 +10,20 @@ const pg = require('pg')
 const cors = require('cors')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
-const startingLog = require('./middleware/startingLog')
 const moment = require('moment')
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
+const xss = require('xss-clean')
+const path = require('path')
+
+const startingLog = require('./middleware/startingLog')
+
 const todoRouter = require('./router/todoRouter')
 const userRouter = require('./router/userRouter')
 const authRouter = require('./router/authRouter')
 const error = require('./controller/errorController')
-const xss = require('xss-clean')
 
-
+console.log(process.env.DATABASE_URL)
 /**
  * postgresql date conversion issue fixing
  *
@@ -56,6 +59,9 @@ app.use(helmet.xssFilter({ setOnOldIE: true }))
 /* apply non-persistent xss blocker by implementing X-DNS-Prefetch-Control = off */
 app.use(helmet.dnsPrefetchControl())
 
+/* apply persistent xss blocker by avoiding escape character in http request param, headers, and body*/
+app.use(xss())
+
 /* apply rate limit to prevent same ip does hit site too much */
 app.use('/', rateLimit({
     max: 100,
@@ -68,9 +74,6 @@ app.use(cookieParser())
 
 /* apply rest json api consumption and limit the size of json */
 app.use(bodyParser.json({limit: '10kb'}))
-
-/* apply persistent xss blocker by avoiding escape character in http request param, headers, and body*/
-app.use(xss())
 
 /* apply request endpoint starting call log */
 app.use(startingLog)

@@ -5,9 +5,18 @@
  * bysrkh@gmail.com
  */
 
+/* load .env file from working directory */
+var path = require('path')
+require('dotenv').config({
+    path: path.resolve(process.cwd(), '.env'),
+    debug: process.env.ENV_INFO === 'DEV'
+});
+
 var app = require('../app');
 var http = require('http');
 
+/* run server */
 var server = http.createServer(app)
-
-server.listen(8080)
+server.listen(process.env.PORT, () => (
+    console.log(`${process.env.HOST} on port ${process.env.PORT} is running on`)
+))

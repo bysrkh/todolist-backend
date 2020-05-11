@@ -6,3 +6,7 @@
 
 # npm local packages
 node_modules
+
+# configuration environment
+.env
+*.env

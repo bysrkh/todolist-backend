@@ -4,7 +4,6 @@
  *
  * bysrkh@gmail.com
  */
-const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
 const multer = require('multer')
 

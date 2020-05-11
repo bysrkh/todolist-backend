@@ -8,11 +8,11 @@
 const Sequelize = require('sequelize')
 
 module.exports = new Sequelize(
-    'todo', 'postgres', 'postgres',
+    process.env.DATABASE_SCHEMA, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD,
     {
-        host: 'localhost',
-        port: 5432,
-        dialect: 'postgres'
+        host: process.env.DATABASE_HOST,
+        port: process.env.DATABASE_PORT,
+        dialect: process.env.DATABASE_DIALECT
     }
 )
 
