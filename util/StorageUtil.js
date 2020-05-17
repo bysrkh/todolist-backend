@@ -5,6 +5,8 @@
  * bysrkh@gmail.com
  */
 const fs = require('fs')
+const AWS = require('aws-sdk')
+const stream = require('stream')
 
 class StorageUtil {
 
@@ -18,16 +20,34 @@ class StorageUtil {
             if (err) return cb(err)
 
             this.getFilename(req, file, (err, filename) => {
-                const outStream = fs.createWriteStream(path + filename)
-                file.stream.pipe(outStream)
-                outStream.on('error', cb)
-                outStream.on('finish', () => {
-                    cb(null, {
-                        path: path,
-                        filename: filename,
-                        size: outStream.bytesWritten
-                    })
+                const s3 = new AWS.S3({
+                    endpoint: process.env.S3_HOST,
+                    accessKeyId: process.env.S3_ACCESS_KEY,
+                    secretAccessKey: process.env.S3_SECRET_KEY
                 })
+
+                function outStream(s3) {
+                    const pass = new stream.PassThrough();
+                    s3.upload({
+                        Bucket: process.env.S3_BUCKET,
+                        Key: filename,
+                        Body: pass
+                    }, {
+                        partSize: 5242880,
+                        queueSize: 1
+                    }, function (err, data) {
+                        if (err) cb(err)
+                        if (data) cb(null, {
+                            path: path,
+                            filename: filename,
+                            size: file.size
+                        })
+                    })
+
+                    return pass
+                }
+
+                file.stream.pipe(outStream(s3))
             })
         })
     )
