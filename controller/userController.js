@@ -36,7 +36,7 @@ const findAll = catchAsync(async (req, res, next) => {
 
 const update = catchAsync(async (req, res, next) => {
     (req.body.password && req.body.confirmPassword) && (req.body = {...req.body, isModified: true})
-    (req.file) && (req.body = {...req.body, photo: req.file.filename})
+    (req.file) && (req.body = {...req.body, fileName: req.file.fileName, fileBucket: req.file.fileBucket})
     const [success] = await userModel.update(
         {...req.body},
         {where: {id: req.body.id}, individualHooks: true}
@@ -52,7 +52,7 @@ const update = catchAsync(async (req, res, next) => {
 })
 
 const imageStorage = storageUtil({
-    destination: (req, file, cb) => cb(null, 'public/image/user/'),
+    destination: (req, file, cb) => cb(null, process.env.S3_BUCKET),
     filename: (req, file, cb) => cb(null, `user-image-${Date.now().valueOf()}.${file.mimetype.split('/')[1]}`)
 })
 const imageFilter = (req, file, callback) => (

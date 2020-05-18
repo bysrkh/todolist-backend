@@ -55,10 +55,21 @@ const userModel = conn.define(
                 }
             }
         },
-        photo: {
+        fileName: {
             type: STRING,
             allowNull: false,
             validate: {notEmpty: {msg: 'Can not be empty'}}
+        },
+        fileBucket: {
+            type: STRING,
+            allowNull: false,
+            validate: {notEmpty: {msg: 'Can not be empty'}}
+        },
+        fileLink: {
+            type: VIRTUAL,
+            get() {
+                return `${this.fileBucket}/${this.fileName}`
+            }
         },
         role: {
             type: STRING,

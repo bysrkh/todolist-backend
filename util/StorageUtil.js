@@ -16,7 +16,7 @@ class StorageUtil {
     }
 
     _handleFile = (req, file, cb) => (
-        this.getDestination(req, file, (err, path) => {
+        this.getDestination(req, file, (err, bucketName) => {
             if (err) return cb(err)
 
             this.getFilename(req, file, (err, filename) => {
@@ -29,7 +29,7 @@ class StorageUtil {
                 function outStream(s3) {
                     const pass = new stream.PassThrough();
                     s3.upload({
-                        Bucket: process.env.S3_BUCKET,
+                        Bucket: bucketName,
                         Key: filename,
                         Body: pass
                     }, {

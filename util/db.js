@@ -8,7 +8,7 @@
 const Sequelize = require('sequelize')
 
 module.exports = new Sequelize(
-    process.env.DATABASE_SCHEMA, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD,
+    process.env.DATABASE_NAME, process.env.DATABASE_USERNAME, process.env.DATABASE_PASSWORD,
     {
         host: process.env.DATABASE_HOST,
         port: process.env.DATABASE_PORT,
