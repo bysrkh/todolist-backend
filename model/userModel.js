@@ -56,11 +56,13 @@ const userModel = conn.define(
             }
         },
         fileName: {
+            field: 'file_name',
             type: STRING,
             allowNull: false,
             validate: {notEmpty: {msg: 'Can not be empty'}}
         },
         fileBucket: {
+            field: 'file_bucket',
             type: STRING,
             allowNull: false,
             validate: {notEmpty: {msg: 'Can not be empty'}}
@@ -88,8 +90,8 @@ const userModel = conn.define(
             field: 'password_reset_token',
             type: STRING,
         },
-        passwordResetExpires: {
-            field: 'password_reset_expires',
+        passwordResetExpiryDate: {
+            field: 'password_reset_expiry_date',
             type: Date,
         },
         modifiedPasswordDate: {
@@ -98,6 +100,11 @@ const userModel = conn.define(
         },
         createdDate: {
             field: 'created_date',
+            type: DATE,
+            defaultValue: NOW
+        },
+        modifiedDate: {
+            field: 'modified_date',
             type: DATE,
             defaultValue: NOW
         }
@@ -130,7 +137,7 @@ userModel.prototype.resetPassword = async function () {
         .createHash('sha256')
         .update(resetToken)
         .digest('hex')
-    this.passwordResetExpires = new DateUtil()
+    this.passwordResetExpiryDate = new DateUtil()
         .addDate(THIRTEEN_MINUTES_CONSTANT)
         .toDate()
 

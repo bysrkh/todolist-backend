@@ -14,7 +14,7 @@ const {userProperties} = require('../util/ObjectUtil')
 const storageUtil = require('../util/StorageUtil')
 
 const create = catchAsync(async (req, res, next) => {
-    const user = await userModel.create({...req.body})
+    const user = await userModel.create({...req.body, fileName: 'default.jpeg', fileBucket: 'todolist-image'})
 
     res
         .status(201)

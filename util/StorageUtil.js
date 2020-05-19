@@ -19,7 +19,7 @@ class StorageUtil {
         this.getDestination(req, file, (err, bucketName) => {
             if (err) return cb(err)
 
-            this.getFilename(req, file, (err, filename) => {
+            this.getFilename(req, file, (err, fileName) => {
                 const s3 = new AWS.S3({
                     endpoint: process.env.S3_HOST,
                     accessKeyId: process.env.S3_ACCESS_KEY,
@@ -30,7 +30,7 @@ class StorageUtil {
                     const pass = new stream.PassThrough();
                     s3.upload({
                         Bucket: bucketName,
-                        Key: filename,
+                        Key: fileName,
                         Body: pass
                     }, {
                         partSize: 5242880,
@@ -39,7 +39,7 @@ class StorageUtil {
                         if (err) cb(err)
                         if (data) cb(null, {
                             path: path,
-                            filename: filename,
+                            fileName: fileName,
                             size: file.size
                         })
                     })

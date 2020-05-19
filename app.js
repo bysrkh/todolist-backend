@@ -14,7 +14,6 @@ const moment = require('moment')
 const rateLimit = require('express-rate-limit')
 const helmet = require('helmet')
 const xss = require('xss-clean')
-const path = require('path')
 
 const startingLog = require('./middleware/startingLog')
 
@@ -23,7 +22,6 @@ const userRouter = require('./router/userRouter')
 const authRouter = require('./router/authRouter')
 const error = require('./controller/errorController')
 
-console.log(process.env.DATABASE_URL)
 /**
  * postgresql date conversion issue fixing
  *

@@ -4,7 +4,9 @@
   "description": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "startMigration": "db-migrate up",
+    "resetMigration": "db-migrate reset"
   },
   "keywords": [],
   "author": "",

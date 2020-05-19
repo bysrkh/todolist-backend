@@ -35,6 +35,12 @@ const todoModel = conn.define(
             type: DATE,
             defaultValue: NOW
 
+        },
+        modifiedDate: {
+            field: 'modified_date',
+            type: DATE,
+            defaultValue: NOW
+
         }
     }, {
         tableName: 'todo',

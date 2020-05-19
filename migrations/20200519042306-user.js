@@ -30,7 +30,7 @@ const setup = (options, seedLink) => {
 const up = (db, callback) => {
     bcrypt.hash(process.env.JWT_SECRET, 12, (er, hashPassword) => {
         const loadUUIDModule = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
-        const insertDataToUser = `INSERT INTO public.user (id, username, password, email, file_name, file_bucket, created_date, modified_date, role) VALUES (uuid_generate_v4(), 'admin', '${hashPassword}', 'bysrkh@gmail.com', 'todolist-image', 'winda_nurmala.jpeg', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'admin');`
+        const insertDataToUser = `INSERT INTO public.user (id, username, password, email, file_bucket, file_name, created_date, modified_date, role) VALUES (uuid_generate_v4(), 'admin', '${hashPassword}', 'bysrkh@gmail.com', 'todolist-image', 'default.jpeg', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'admin');`
         db.runSql(`${loadUUIDModule}${insertDataToUser}`, callback)
     })
 }
