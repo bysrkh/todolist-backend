@@ -6,9 +6,13 @@
  */
 
 'use strict';
-
+const path = require('path')
+require('dotenv').config({
+    path: path.resolve(process.cwd(), '.env'),
+    debug: process.env.ENV_INFO === 'DEV'
+})
+const bcrypt = require('bcrypt')
 const uuid = require('uuid/v5')
-
 var dbm
 var type
 var seed
@@ -24,9 +28,11 @@ const setup = (options, seedLink) => {
 }
 
 const up = (db, callback) => {
-    const loadUUIDModule = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
-    const insertDataToUser = `INSERT INTO public.user (id, username, password, email, file_name, file_bucket, created_date, modified_date, role) VALUES (uuid_generate_v4(), 'admin', 'admin', 'bysrkh@gmail.com', 'todolist-image', 'winda_nurmala.jpeg', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'admin');`
-    db.runSql(`${loadUUIDModule}${insertDataToUser}`, callback)
+    bcrypt.hash(process.env.JWT_SECRET, 12, (er, hashPassword) => {
+        const loadUUIDModule = `CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+        const insertDataToUser = `INSERT INTO public.user (id, username, password, email, file_name, file_bucket, created_date, modified_date, role) VALUES (uuid_generate_v4(), 'admin', '${hashPassword}', 'bysrkh@gmail.com', 'todolist-image', 'winda_nurmala.jpeg', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'admin');`
+        db.runSql(`${loadUUIDModule}${insertDataToUser}`, callback)
+    })
 }
 
 const down = (db, callback) => db.runSql('DELETE FROM public.user', callback)
