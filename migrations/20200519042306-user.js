@@ -13,9 +13,8 @@ require('dotenv').config({
 })
 const bcrypt = require('bcrypt')
 const uuid = require('uuid/v5')
-var dbm
-var type
-var seed
+
+var dbm, type, seed
 
 /**
  * We receive the dbmigrate dependency from dbmigrate initially.
