@@ -1,5 +1,5 @@
 const userProperties = {
-    showUser: ['id', 'username', 'email', 'role', 'createdDate'],
+    nonGeneralUserProperties: ['password', 'passwordResetToken', 'passwordResetExpiryDate', 'modifiedPasswordDate'],
     showOnlyId: ['id'],
     showOnlyUsername: ['username']
 }
