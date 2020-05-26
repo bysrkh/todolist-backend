@@ -1,5 +1,5 @@
 const userProperties = {
-    nonGeneralUserProperties: ['password', 'passwordResetToken', 'passwordResetExpiryDate', 'modifiedPasswordDate'],
+    userSensitiveProperties: ['password', 'passwordResetToken', 'passwordResetExpiryDate', 'modifiedPasswordDate'],
     showOnlyId: ['id'],
     showOnlyUsername: ['username']
 }

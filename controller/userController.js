@@ -22,14 +22,14 @@ const create = catchAsync(async (req, res, next) => {
 })
 
 const find = catchAsync(async (req, res, next) => {
-    const user = await userModel.findByPk(req.params.id, {attributes: {exclude: userProperties.nonGeneralUserProperties}})
+    const user = await userModel.findByPk(req.params.id, {attributes: {exclude: userProperties.userSensitiveProperties}})
     user ?
         res.json(user.toJSON()) :
         next(new AppError({status: 404, message: `User with id : ${req.params.id} is not found`}))
 })
 
 const findAll = catchAsync(async (req, res, next) => {
-    const users = await userModel.findAll({attributes: {exclude: userProperties.nonGeneralUserProperties}})
+    const users = await userModel.findAll({attributes: {exclude: userProperties.userSensitiveProperties}})
 
     res.json([...users])
 })
